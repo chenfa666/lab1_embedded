@@ -55,8 +55,11 @@ void SystemClock_Config(void);
 void system_init();
 void test_LedDebug();
 void test_LedY0();
-void test_LedY1();
+void test_LedX0();
 void test_7seg();
+void test_colon_toggle();
+void test_7seg_refresh();
+void test_7seg_shifting();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -96,7 +99,6 @@ int main(void)
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
   system_init();
-  led7_SetColon(1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -108,8 +110,10 @@ int main(void)
 	  // main task, every 50ms
 	  test_LedDebug();
 	  test_LedY0();
-	  test_LedY1();
+	  test_LedX0();
 	  test_7seg();
+	  test_colon_toggle();
+	  test_7seg_refresh();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -168,36 +172,103 @@ void system_init(){
 	  HAL_GPIO_WritePin(DEBUG_LED_GPIO_Port, DEBUG_LED_Pin, 0);
 	  timer_init();
 	  led7_init();
-	  setTimer2(50);
+	  setTimer2(PERIOD);
 }
 
 uint8_t count_led_debug = 0;
 uint8_t count_led_Y0 = 0;
-uint8_t count_led_Y1 = 0;
+uint8_t count_led_X0 = 0;
+
 
 void test_LedDebug(){
-	count_led_debug = (count_led_debug + 1)%20;
+	count_led_debug = (count_led_debug + 1)%40;
 	if(count_led_debug == 0){
 		HAL_GPIO_TogglePin(DEBUG_LED_GPIO_Port, DEBUG_LED_Pin);
 	}
 }
 
 void test_LedY0(){
-	count_led_Y0 = (count_led_Y0+ 1)%100;
-	if(count_led_Y0 > 40){
+	count_led_Y0 = (count_led_Y0+ 1)%120;
+	if(count_led_Y0 > 80){
 		HAL_GPIO_WritePin(OUTPUT_Y0_GPIO_Port, OUTPUT_Y0_Pin, 1);
-	} else {
+	}
+	else {
 		HAL_GPIO_WritePin(OUTPUT_Y0_GPIO_Port, OUTPUT_Y0_Pin, 0);
 	}
 }
 
-void test_LedY1(){
-	count_led_Y1 = (count_led_Y1+ 1)%40;
-	if(count_led_Y1 > 10){
-		HAL_GPIO_WritePin(OUTPUT_Y1_GPIO_Port, OUTPUT_Y1_Pin, 0);
-	} else {
-		HAL_GPIO_WritePin(OUTPUT_Y0_GPIO_Port, OUTPUT_Y1_Pin, 1);
+void test_LedX0(){
+	count_led_X0 = (count_led_X0+ 1)%120;
+	if(count_led_X0 > 20){
+		HAL_GPIO_WritePin(OUTPUT_X0_GPIO_Port, OUTPUT_X0_Pin, 0);
 	}
+	else {
+		HAL_GPIO_WritePin(OUTPUT_X0_GPIO_Port, OUTPUT_X0_Pin, 1);
+	}
+}
+
+uint8_t led_idx = 0;
+void test_7seg_refresh(){
+	switch (led_idx) {
+		case 0:
+			led7_SetDigit(0, 0, 0);
+			led7_SetDigit(OFF_7SEG, 1, 0);
+			led7_SetDigit(OFF_7SEG, 2, 0);
+			led7_SetDigit(OFF_7SEG, 3, 0);
+			led_idx = 1;
+			break;
+		case 1:
+			led7_SetDigit(0, 1, 0);
+			led7_SetDigit(OFF_7SEG, 0, 0);
+			led7_SetDigit(OFF_7SEG, 2, 0);
+			led7_SetDigit(OFF_7SEG, 3, 0);
+			led_idx = 2;
+			break;
+		case 2:
+			led7_SetDigit(0, 2, 0);
+			led7_SetDigit(OFF_7SEG, 0, 0);
+			led7_SetDigit(OFF_7SEG, 1, 0);
+			led7_SetDigit(OFF_7SEG, 3, 0);
+			led_idx = 3;
+			break;
+		case 3:
+			led7_SetDigit(0, 3, 0);
+			led7_SetDigit(OFF_7SEG, 0, 0);
+			led7_SetDigit(OFF_7SEG, 1, 0);
+			led7_SetDigit(OFF_7SEG, 2, 0);
+			led_idx = 0;
+			break;
+	}
+
+}
+
+uint8_t idx[4] = {0,1,2,3};
+void test_update_7seg_clock (){
+	uint8_t hours = seconds / 3600;
+	uint8_t minutes = (seconds % 3600) / 60;
+	led7_SetDigit(hours / 10, idx[0], 0);
+	led7_SetDigit(hours % 10, idx[1], 0);
+	led7_SetDigit(minutes / 10, idx[2], 0);
+	led7_SetDigit(minutes % 10, idx[3], 0);
+}
+
+uint8_t colon_status = 0;
+void test_colon_toggle(){
+	led7_SetColon(colon_status);
+	if(colon_status == 0){
+		colon_status = 1;
+	}
+	else colon_status = 0;
+}
+
+void test_7seg_shifting(){
+	uint8_t tmp;
+	for(uint8_t i = 3; i > 0; i++){
+		tmp = idx[i];
+		idx[i] = idx[i-1];
+		idx[i-1] = tmp;
+	}
+	test_update_7seg_clock();
 }
 
 void test_7seg(){

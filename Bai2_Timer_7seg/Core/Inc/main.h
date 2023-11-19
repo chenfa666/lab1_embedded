@@ -64,8 +64,8 @@ void Error_Handler(void);
 #define OUTPUT_Y0_GPIO_Port GPIOE
 #define OUTPUT_Y1_Pin GPIO_PIN_6
 #define OUTPUT_Y1_GPIO_Port GPIOE
-#define INPUT_X0_Pin GPIO_PIN_6
-#define INPUT_X0_GPIO_Port GPIOA
+#define OUTPUT_X0_Pin GPIO_PIN_6
+#define OUTPUT_X0_GPIO_Port GPIOA
 #define INPUT_X1_Pin GPIO_PIN_7
 #define INPUT_X1_GPIO_Port GPIOA
 #define INPUT_X2_Pin GPIO_PIN_4
@@ -76,8 +76,13 @@ void Error_Handler(void);
 #define LD_LATCH_GPIO_Port GPIOG
 #define BTN_LOAD_Pin GPIO_PIN_3
 #define BTN_LOAD_GPIO_Port GPIOD
-/* USER CODE BEGIN Private defines */
 
+#define FREQ 2
+#define PERIOD (1000 / FREQ)
+#define OFF_7SEG 10
+#define MAX_SEC_A_DAY 86400
+#define A_SECOND 1000
+/* USER CODE BEGIN Private defines */
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

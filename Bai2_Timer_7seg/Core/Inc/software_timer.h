@@ -10,8 +10,12 @@
 
 #include "tim.h"
 #include "software_timer.h"
+#include "led_7seg.h"
 
 extern uint16_t flag_timer2;
+extern uint16_t seconds;
+extern uint16_t clock_counter;
+
 
 void timer_init();
 void setTimer2(uint16_t duration);

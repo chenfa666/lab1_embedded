@@ -14,6 +14,10 @@ uint16_t flag_timer2 = 0;
 uint16_t timer2_counter = 0;
 uint16_t timer2_MUL = 0;
 
+uint16_t clock_counter = A_SECOND;
+uint16_t seconds = 0;
+
+
 
 /**
   * @brief  Init timer interrupt
@@ -51,6 +55,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				timer2_counter = timer2_MUL;
 			}
 		}
+		if(clock_counter > 0){
+					clock_counter--;
+					if(clock_counter == 0) {
+						clock_counter = A_SECOND;
+						if(seconds == MAX_SEC_A_DAY){
+							seconds = 0;
+						}
+						else seconds++;
+					}
+				}
 		// 1ms interrupt here
 		led7_Scan();
 	}
